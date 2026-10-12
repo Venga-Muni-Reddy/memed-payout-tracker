@@ -16,7 +16,7 @@ You need Node.js 20+ and either a MongoDB connection string or nothing at all (d
 ```bash
 # 1. Backend
 cd backend
-cp .env.example .env          # edit MONGODB_URI` (or `MONGODB_USER` + `MONGODB_PASSWORD` + `MONGODB_HOST` for an Atlas SRV host), or leave it empty to use the in-memory DB in dev
+cp .env.example .env          # edit MONGODB_URI (or MONGODB_USER + MONGODB_PASSWORD + MONGODB_HOST), or leave empty for the in-memory DB in dev
 npm install
 npm run dev                   # http://localhost:4000
 
