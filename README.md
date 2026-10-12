@@ -41,13 +41,15 @@ Run the tests: `cd backend && npm test`
 | backend | `PORT` | Default `4000` |
 | frontend | `NEXT_PUBLIC_API_URL` | Base URL of the backend, no trailing slash |
 
-Production build: `cd backend && npm run build && npm start` and `cd frontend && npm run build && npm start`.
+Production build (long-running server): `cd backend && npm run build && npm start` and `cd frontend && npm run build && npm start`.
 
-## Deploying (free tiers)
+## Deploying (free tiers, all on Vercel)
 
-- **Database:** MongoDB Atlas free cluster. Add a database user and allow network access (0.0.0.0/0 on free hosting, since the host IP changes).
-- **Backend on Render:** `render.yaml` in the repo root describes the web service (root `backend`, build `npm install --include=dev && npm run build`, start `npm start`). Set `MONGODB_URI`, `JWT_SECRET` and `CORS_ORIGIN` (the frontend URL). Health check: `/api/health`. Render's free plan sleeps when idle, so the first request after a pause can take about a minute.
-- **Frontend on Vercel:** import the repo, set the root directory to `frontend`, and set `NEXT_PUBLIC_API_URL` to the Render URL.
+Both apps deploy as separate Vercel projects from this one repo.
+
+- **Database:** MongoDB Atlas free cluster. Add a database user and allow network access (0.0.0.0/0, since serverless IPs change).
+- **Backend project:** root directory `backend`, framework preset "Other". `backend/api/index.ts` wraps the same Express app as a serverless function and `backend/vercel.json` rewrites every path to it. Environment variables: `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN` (the frontend URL). The database connection is cached between requests, so only a cold start reconnects. Health check: `/api/health`.
+- **Frontend project:** root directory `frontend`, framework Next.js. Set `NEXT_PUBLIC_API_URL` to the backend project URL (no trailing slash), then redeploy.
 
 ## How payouts work
 
@@ -116,7 +118,8 @@ The payout step is the only part with a shared hot spot (one campaign document p
 ```
 backend/
   src/
-    server.ts            starts MongoDB and the HTTP server
+    server.ts            local/long-running server: starts MongoDB and listens
+    db.ts                cached MongoDB connection used by the serverless entry
     app.ts               Express app, routes, central error handler
     config.ts            reads environment variables
     models/              User, Campaign, Submission (Mongoose)
@@ -124,6 +127,7 @@ backend/
     middleware/auth.ts   JWT check and role check
     services/payout.ts   pure payout rules (unit tested)
     services/viewsService.ts  atomic views update and payout
+  api/index.ts           Vercel serverless entry (wraps the Express app)
   tests/                 payout.test.ts (unit), api.test.ts (API + concurrency)
 frontend/
   app/                   login, signup, brand and creator pages
