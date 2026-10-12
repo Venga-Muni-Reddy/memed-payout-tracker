@@ -13,7 +13,7 @@ async function resolveMongoUri(): Promise<string> {
 }
 
 async function main() {
-  await mongoose.connect(await resolveMongoUri());
+  await mongoose.connect(await resolveMongoUri(), { dbName: config.dbName, serverSelectionTimeoutMS: 15000 });
   await mongoose.syncIndexes();
   createApp().listen(config.port, () => console.log(`API listening on :${config.port}`));
 }

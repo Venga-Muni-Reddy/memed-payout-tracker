@@ -34,6 +34,7 @@ Run the tests: `cd backend && npm test`
 | Where | Variable | Purpose |
 | --- | --- | --- |
 | backend | `MONGODB_URI` | MongoDB connection string. Required in production. Empty in dev = in-memory MongoDB |
+| backend | `MONGODB_DB` | Database name, default `memed` |
 | backend | `JWT_SECRET` | Secret used to sign tokens. Use a long random string in production |
 | backend | `JWT_EXPIRES_IN` | Token lifetime, default `7d` |
 | backend | `CORS_ORIGIN` | Allowed frontend origin(s), comma separated. `*` allows all |
@@ -41,6 +42,12 @@ Run the tests: `cd backend && npm test`
 | frontend | `NEXT_PUBLIC_API_URL` | Base URL of the backend, no trailing slash |
 
 Production build: `cd backend && npm run build && npm start` and `cd frontend && npm run build && npm start`.
+
+## Deploying (free tiers)
+
+- **Database:** MongoDB Atlas free cluster. Add a database user and allow network access (0.0.0.0/0 on free hosting, since the host IP changes).
+- **Backend on Render:** `render.yaml` in the repo root describes the web service (root `backend`, build `npm install --include=dev && npm run build`, start `npm start`). Set `MONGODB_URI`, `JWT_SECRET` and `CORS_ORIGIN` (the frontend URL). Health check: `/api/health`. Render's free plan sleeps when idle, so the first request after a pause can take about a minute.
+- **Frontend on Vercel:** import the repo, set the root directory to `frontend`, and set `NEXT_PUBLIC_API_URL` to the Render URL.
 
 ## How payouts work
 
